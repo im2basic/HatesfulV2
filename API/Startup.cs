@@ -24,6 +24,8 @@ namespace API
             //get connection to database using connection string
             services.AddDbContext<StoreContext>(x => x.UseSqlite(_config.GetConnectionString("DefaultConnection")));
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddControllers().AddJsonOptions(options =>
+                { options.JsonSerializerOptions.PropertyNameCaseInsensitive = false; });
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIv5", Version = "v1" });
