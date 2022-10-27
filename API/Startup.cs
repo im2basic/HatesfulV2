@@ -1,4 +1,5 @@
 
+using API.Helpers;
 using Core.Interfaces;
 using Infastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ namespace API
             //get connection to database using connection string
             services.AddDbContext<StoreContext>(x => x.UseSqlite(_config.GetConnectionString("DefaultConnection")));
             services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddAutoMapper(typeof(MappingProfiles));
             services.AddControllers().AddJsonOptions(options =>
                 { options.JsonSerializerOptions.PropertyNameCaseInsensitive = false; });
             services.AddSwaggerGen(c =>
@@ -45,6 +47,7 @@ namespace API
             app.UseHttpsRedirection();
 
             app.UseRouting();
+            app.UseStaticFiles();
 
             app.UseAuthorization();
 
