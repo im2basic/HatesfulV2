@@ -1,9 +1,10 @@
 
+using API.Extensions;
 using API.Helpers;
-using Core.Interfaces;
+using API.MiddleWare;
 using Infastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Models;
+
 
 namespace API
 {
@@ -21,36 +22,28 @@ namespace API
         {
 
             services.AddControllers();
-            services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
             //get connection to database using connection string
             services.AddDbContext<StoreContext>(x => x.UseSqlite(_config.GetConnectionString("DefaultConnection")));
-            services.AddScoped<IProductRepository, ProductRepository>();
             services.AddAutoMapper(typeof(MappingProfiles));
             services.AddControllers().AddJsonOptions(options =>
                 { options.JsonSerializerOptions.PropertyNameCaseInsensitive = false; });
-            services.AddSwaggerGen(c =>
-            {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "WebAPIv5", Version = "v1" });
-            });
+            services.AddApplicationServices();
+            services.AddSwaggerDocumentation();
+            
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "WebAPIv5 v1"));
-            }
+            app.UseMiddleware<ExceptionMiddleware>();
+
+            app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
             app.UseHttpsRedirection();
-
+            app.UseSwaggerDocumentation();
             app.UseRouting();
             app.UseStaticFiles();
-
             app.UseAuthorization();
-
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
